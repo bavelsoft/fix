@@ -37,13 +37,13 @@ public class Order {
         }
 
         public void reject() {
-                terminalStatus = Rejected;
                 leavesQty = 0;
+                terminalStatus = Rejected;
         }
 
         public void done() {
-                terminalStatus = DoneForDay;
                 leavesQty = 0;
+                terminalStatus = DoneForDay;
         }
 
 	public long getCumQty() {

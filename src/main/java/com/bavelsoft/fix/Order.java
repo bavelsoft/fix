@@ -11,14 +11,19 @@ public class Order {
         Request lastRequest;
         OrdStatus terminalStatus;
 
-        public void reject() {
-                terminalStatus = Rejected;
-                leavesQty = 0;
+        public void fill(Execution x) {
+                avgPx = x.getNewAvgPx(this);
+                cumQty += x.getQty();
+                leavesQty -= x.getQty();
         }
 
-        public void done() {
-                terminalStatus = DoneForDay;
-                leavesQty = 0;
+        public void request(Request request) {
+                request.previousRequest = lastRequest;
+                lastRequest = request;
+        }
+
+        public void replace(Object fields) {
+                this.fields = fields;
         }
 
         public void cancel() {
@@ -31,19 +36,14 @@ public class Order {
 			terminalStatus = Canceled;
         }
 
-        public void replace(Object fields) {
-                this.fields = fields;
+        public void reject() {
+                terminalStatus = Rejected;
+                leavesQty = 0;
         }
 
-        public void fill(Execution x) {
-                avgPx = x.getNewAvgPx(this);
-                cumQty += x.getQty();
-                leavesQty -= x.getQty();
-        }
-
-        public void request(Request request) {
-                request.previousRequest = lastRequest;
-                lastRequest = request;
+        public void done() {
+                terminalStatus = DoneForDay;
+                leavesQty = 0;
         }
 
 	public long getCumQty() {

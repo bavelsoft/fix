@@ -29,7 +29,7 @@ public class Execution {
 
 	public double getNewAvgPx(Order order) {
 		double value = qty * price;
-		double orderValue = order.getCumQty()*order.getAvgPx();
+		double orderValue = order.getCumQty() * order.getAvgPx();
 		return (orderValue + value) / (order.getCumQty() + qty);
 	}
 }

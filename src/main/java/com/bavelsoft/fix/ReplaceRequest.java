@@ -10,11 +10,13 @@ public class ReplaceRequest extends Request {
                 this.fields = fields;
         }
 
+	@Override
         OrdStatus getPendingOrdStatus() {
                 return PendingReplace;
         }
 
-        protected void acceptImpl() {
+	@Override
+        protected void onAccept() {
                 order.replace(fields);
         }
 }

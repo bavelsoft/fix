@@ -7,11 +7,13 @@ public class NewRequest extends Request {
                 super(order);
         }
 
+	@Override
         OrdStatus getPendingOrdStatus() {
                 return PendingNew;
         }
 
-        protected void rejectImpl() {
+	@Override
+        protected void onReject() {
                 order.reject();
         }
 }

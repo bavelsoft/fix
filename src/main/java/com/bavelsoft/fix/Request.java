@@ -12,12 +12,12 @@ public abstract class Request {
 
         public void accept() {
                 isAccepted = true;
-                acceptImpl();
+                onAccept();
         }
 
         public void reject() {
                 isRejected = true;
-                rejectImpl();
+                onReject();
         }
 
         public Request getLastPending() {
@@ -27,8 +27,12 @@ public abstract class Request {
                 return request;
         }
 
-        protected void acceptImpl() {}
-        protected void rejectImpl() {}
+        protected void onAccept() {
+	}
+
+        protected void onReject() {
+	}
+
         abstract OrdStatus getPendingOrdStatus();
 }
 

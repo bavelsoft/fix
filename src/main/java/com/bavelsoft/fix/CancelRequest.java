@@ -7,11 +7,13 @@ public class CancelRequest extends Request {
 		super(order);
 	}
 
+	@Override
         OrdStatus getPendingOrdStatus() {
                 return PendingCancel;
         }
 
-        protected void acceptImpl() {
+	@Override
+        protected void onAccept() {
                 order.cancel();
         }
 }

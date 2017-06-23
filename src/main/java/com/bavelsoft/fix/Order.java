@@ -12,7 +12,7 @@ public class Order {
         OrdStatus terminalStatus;
 
         public void fill(Execution x) {
-                avgPx = x.getNewAvgPx(this);
+                avgPx = x.getNewAvgPx(this); //must be before changing cumQty
                 cumQty += x.getQty();
                 leavesQty -= x.getQty();
         }

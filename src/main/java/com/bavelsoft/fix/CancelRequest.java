@@ -8,13 +8,13 @@ public class CancelRequest extends Request {
 	}
 
 	@Override
-        OrdStatus getPendingOrdStatus() {
+        protected OrdStatus getPendingOrdStatus() {
                 return PendingCancel;
         }
 
 	@Override
         protected void onAccept() {
-                order.cancel();
+                getOrder().cancel();
         }
 }
 

@@ -11,13 +11,13 @@ public class ReplaceRequest extends Request {
         }
 
 	@Override
-        OrdStatus getPendingOrdStatus() {
+        protected OrdStatus getPendingOrdStatus() {
                 return PendingReplace;
         }
 
 	@Override
         protected void onAccept() {
-                order.replace(fields);
+                getOrder().replace(fields);
         }
 }
 

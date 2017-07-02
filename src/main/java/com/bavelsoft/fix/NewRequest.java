@@ -8,13 +8,13 @@ public class NewRequest extends Request {
         }
 
 	@Override
-        OrdStatus getPendingOrdStatus() {
+        protected OrdStatus getPendingOrdStatus() {
                 return PendingNew;
         }
 
 	@Override
         protected void onReject() {
-                order.reject();
+                getOrder().reject();
         }
 }
 

@@ -3,10 +3,13 @@ package com.bavelsoft.fix;
 public abstract class Request {
         private String clOrdID;
         private boolean isRejected, isAccepted;
-        protected Order order;
-        protected Request previousRequest;
+        private Order order;
 
-        Request(Order order) {
+        protected void onAccept() {}
+        protected void onReject() {}
+        protected abstract OrdStatus getPendingOrdStatus();
+
+        public Request(Order order) {
                 this.order = order;
         }
 
@@ -20,20 +23,11 @@ public abstract class Request {
                 onReject();
         }
 
-        public Request getLastPending() {
-                Request request = this;
-                while (request != null && (request.isRejected || request.isAccepted))
-                        request = request.previousRequest;
-                return request;
-        }
-
-        protected void onAccept() {
+	public boolean isPending() {
+		return !isAccepted && !isRejected;
 	}
 
-        protected void onReject() {
+	protected Order getOrder() {
+		return order;
 	}
-
-        abstract OrdStatus getPendingOrdStatus();
 }
-
-

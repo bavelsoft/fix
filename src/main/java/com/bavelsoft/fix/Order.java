@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class Order {
         private Object fields;
-        private long cumQty, leavesQty, orderID;
+        private long orderQty, cumQty, leavesQty, orderID;
         private double avgPx;
         private OrdStatus terminalStatus;
 	private List<Request> requests = new ArrayList<>();
@@ -19,8 +19,10 @@ public class Order {
                 leavesQty -= x.getQty();
         }
 
-        public void replace(Object fields) {
+        public void replace(Object fields, long orderQty) {
                 this.fields = fields;
+		this.leavesQty += orderQty - this.orderQty;
+                this.orderQty = orderQty;
         }
 
         public void cancel() {
@@ -67,6 +69,6 @@ public class Order {
 	}
 
 	public long getOrderQty() {
-		return 0; //TODO should come from fields
+		return orderQty;
 	}
 }

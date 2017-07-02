@@ -9,8 +9,9 @@ public abstract class Request {
         protected void onReject() {}
         protected abstract OrdStatus getPendingOrdStatus();
 
-        public Request(Order order) {
+        public Request(Order order, String clOrdID) {
                 this.order = order;
+                this.clOrdID = clOrdID;
         }
 
         public void accept() {
@@ -27,7 +28,7 @@ public abstract class Request {
 		return !isAccepted && !isRejected;
 	}
 
-	protected Order getOrder() {
+	public Order getOrder() {
 		return order;
 	}
 }

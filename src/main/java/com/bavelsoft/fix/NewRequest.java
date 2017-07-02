@@ -3,8 +3,8 @@ package com.bavelsoft.fix;
 import static com.bavelsoft.fix.OrdStatus.PendingNew;
 
 public class NewRequest extends Request {
-        public NewRequest(Order order) {
-                super(order);
+        public NewRequest(Order order, String clOrdID) {
+                super(order, clOrdID);
         }
 
 	@Override

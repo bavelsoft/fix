@@ -8,7 +8,8 @@ import java.util.ArrayList;
 
 public class Order {
         private Object fields;
-        private long orderQty, cumQty, leavesQty, orderID;
+        private long orderQty, cumQty, leavesQty;
+	private String orderID;
         private double avgPx;
         private OrdStatus terminalStatus;
 	private List<Request> requests = new ArrayList<>();
@@ -60,15 +61,23 @@ public class Order {
 		return terminalStatus;
 	}
 
+	public long getOrderQty() {
+		return orderQty;
+	}
+
 	public long getCumQty() {
 		return cumQty;
 	}
 
-	public double getAvgPx() {
-		return avgPx;
+	public long getLeavesQty() {
+		return leavesQty;
 	}
 
-	public long getOrderQty() {
-		return orderQty;
+	public String getOrderID() {
+		return orderID;
+	}
+
+	public double getAvgPx() {
+		return avgPx;
 	}
 }

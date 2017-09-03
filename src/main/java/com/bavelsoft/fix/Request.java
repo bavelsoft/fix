@@ -20,33 +20,33 @@ public abstract class Request {
         }
 
         public void accept() {
-		order.requests.remove(this);
+		order.getPendingRequests().remove(this);
                 onAccept();
         }
 
         public void reject() {
-		order.requests.remove(this);
+		order.getPendingRequests().remove(this);
                 onReject();
         }
 
 	public static class List {
-		private LinkedList<Request> requests = new LinkedList<>();
+		private LinkedList<Request> pendingRequests = new LinkedList<>();
         	private Order order;
 
 		List(Order order) { this.order = order; }
 	
 		void add(Request request) {
-			requests.add(request);
-			updateWith(request);
+			pendingRequests.add(request);
+			updateOrderWith(request);
 			request.addObserver();
 		}
 
 		void remove(Request request) {
-			requests.remove(request);
-			updateWith(requests.isEmpty() ? null : requests.getLast());
+			pendingRequests.remove(request);
+			updateOrderWith(pendingRequests.isEmpty() ? null : pendingRequests.getLast());
 		}
 
-		private void updateWith(Request request) {
+		private void updateOrderWith(Request request) {
 			order.pendingOrdStatus = request == null ? null : request.getPendingOrdStatus();
 			order.pendingOrderQty = request == null ? 0 : request.getOrderQty();
 		}

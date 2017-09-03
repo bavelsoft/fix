@@ -10,7 +10,7 @@ public class Order {
         private long orderQty, cumQty;
 	long pendingOrderQty, leavesQty;
         OrdStatus terminalOrdStatus, pendingOrdStatus;
-	Request.List requests = new Request.List(this);
+	Request.List pendingRequests = new Request.List(this);
 
         public void fill(long qty, double price) {
 		double totalValue = qty * price + this.cumQty * this.avgPx;
@@ -51,7 +51,7 @@ public class Order {
         }
 
 	public Request.List getPendingRequests() {
-		return requests;
+		return pendingRequests;
 	}
 
 	public OrdStatus getTerminalStatus() {

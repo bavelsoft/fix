@@ -19,12 +19,6 @@ public class ReplaceRequest extends Request {
         }
 
 	@Override
-	void updateAsLast() {
-		getOrder().pendingOrdStatus = getPendingOrdStatus();
-		getOrder().pendingOrderQty = orderQty;
-	}
-
-	@Override
         protected OrdStatus getPendingOrdStatus() {
                 return OrdStatus.PendingReplace;
         }
@@ -43,4 +37,9 @@ public class ReplaceRequest extends Request {
         protected void addObserver() {
 		//reject if the order is cancelled, filled
         }
+
+	@Override
+	public long getOrderQty() {
+		return orderQty;
+	}
 }

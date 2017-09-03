@@ -8,6 +8,7 @@ public abstract class Request {
 
         protected void onAccept() {}
         protected void onReject() {}
+	protected long getOrderQty() { return 0; }
         protected abstract OrdStatus getPendingOrdStatus();
 	protected abstract ExecType getPendingExecType();
 	protected abstract ExecType getAcceptedExecType();
@@ -29,22 +30,26 @@ public abstract class Request {
         }
 
 	public static class List {
-		LinkedList<Request> requests = new LinkedList<>();
+		private LinkedList<Request> requests = new LinkedList<>();
+        	private Order order;
+
+		List(Order order) { this.order = order; }
 	
 		void add(Request request) {
 			requests.add(request);
-			request.updateAsLast();
+			updateWith(request);
 			request.addObserver();
 		}
 
 		void remove(Request request) {
 			requests.remove(request);
-			requests.getLast().updateAsLast();
+			updateWith(requests.isEmpty() ? null : requests.getLast());
 		}
-	}
 
-	void updateAsLast() {
-		order.pendingOrdStatus = getPendingOrdStatus();
+		private void updateWith(Request request) {
+			order.pendingOrdStatus = request == null ? null : request.getPendingOrdStatus();
+			order.pendingOrderQty = request == null ? 0 : request.getOrderQty();
+		}
 	}
 
 	public Order getOrder() {

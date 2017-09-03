@@ -40,7 +40,7 @@ public class Order {
 
         public OrdStatus getOrdStatus(Order order) {
 		return
-                 pendingOrdStatus != null  ? pendingOrdStatus :
+                  pendingOrdStatus != null ? pendingOrdStatus :
                  terminalOrdStatus != null ? terminalOrdStatus :
                         cumQty >= orderQty ? OrdStatus.Filled :
                                 cumQty > 0 ? OrdStatus.PartiallyFilled

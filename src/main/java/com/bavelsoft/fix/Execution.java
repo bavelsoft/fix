@@ -1,5 +1,7 @@
 package com.bavelsoft.fix;
 
+import com.bavelsoft.fix.order.Order;
+
 public class Execution {
 	private Order order;
         private long qty;

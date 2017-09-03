@@ -1,16 +1,18 @@
-package com.bavelsoft.fix;
+package com.bavelsoft.fix.order;
 
 import java.util.List;
 import java.util.ArrayList;
+import com.bavelsoft.fix.OrdStatus;
 
 public class Order {
         private Object fields;
 	private String orderID;
         private double avgPx;
-        private long orderQty, cumQty;
-	long pendingOrderQty, leavesQty;
-        OrdStatus terminalOrdStatus, pendingOrdStatus;
-	Request.List pendingRequests = new Request.List(this);
+        private long orderQty, cumQty, leavesQty;
+	private OrdStatus terminalOrdStatus;
+	private PendingRequests pendingRequests = new PendingRequests(this);
+	long pendingOrderQty;
+        OrdStatus pendingOrdStatus;
 
         public void fill(long qty, double price) {
 		double totalValue = qty * price + this.cumQty * this.avgPx;
@@ -50,7 +52,12 @@ public class Order {
                 terminalOrdStatus = OrdStatus.DoneForDay;
         }
 
-	public Request.List getPendingRequests() {
+        public void reject() {
+                leavesQty = 0;
+                terminalOrdStatus = OrdStatus.Rejected;
+        }
+
+	public PendingRequests getPendingRequests() {
 		return pendingRequests;
 	}
 

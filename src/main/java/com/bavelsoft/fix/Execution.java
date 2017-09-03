@@ -12,22 +12,15 @@ public class Execution {
         }
 
         public void cancel() {
-                qty = -qty;
-                order.fill(this);
+                order.fill(-qty, price);
         }
 
         public void correct(long qty, double price) {
                 cancel();
                 this.qty = qty;
                 this.price = price;
-                order.fill(this);
+                order.fill(qty, price);
         }
-
-	public double getNewAvgPx(Order order) {
-		double value = qty * price;
-		double orderValue = order.getCumQty() * order.getAvgPx();
-		return (orderValue + value) / (order.getCumQty() + qty);
-	}
 
 	public Order getOrder() {
 		return order;

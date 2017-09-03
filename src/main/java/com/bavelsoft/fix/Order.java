@@ -1,29 +1,29 @@
 package com.bavelsoft.fix;
 
-import static com.bavelsoft.fix.OrdStatus.Rejected;
-import static com.bavelsoft.fix.OrdStatus.DoneForDay;
-import static com.bavelsoft.fix.OrdStatus.Canceled;
 import java.util.List;
 import java.util.ArrayList;
 
 public class Order {
         private Object fields;
-        private long orderQty, cumQty, leavesQty;
 	private String orderID;
         private double avgPx;
-        private OrdStatus terminalStatus;
-	private List<Request> requests = new ArrayList<>();
+        private long orderQty, cumQty;
+	long pendingOrderQty, leavesQty;
+        OrdStatus terminalOrdStatus, pendingOrdStatus;
+	Request.List requests = new Request.List();
 
-        public void fill(Execution x) {
-                avgPx = x.getNewAvgPx(this); //must be before changing cumQty
-                cumQty += x.getQty();
-                leavesQty -= x.getQty();
+        public void fill(long qty, double price) {
+		double totalValue = qty * price + this.cumQty * this.avgPx;
+                this.avgPx = totalValue / (this.cumQty + qty);
+                this.cumQty += qty;
+                this.leavesQty -= qty;
         }
 
-        public void replace(Object fields, long orderQty) {
-                this.fields = fields;
-		this.leavesQty += orderQty - this.orderQty;
-                this.orderQty = orderQty;
+        public void replace(Object newFields, long newOrderQty) {
+		newOrderQty = Math.max(newOrderQty, cumQty);
+		this.leavesQty += newOrderQty - orderQty;
+                this.orderQty = newOrderQty;
+                this.fields = newFields;
         }
 
         public void cancel() {
@@ -33,32 +33,29 @@ public class Order {
         public void cancel(long qtyChange) {
                 leavesQty -= qtyChange;
 		if (leavesQty <= 0)
-			terminalStatus = Canceled;
+			terminalOrdStatus = OrdStatus.Canceled;
         }
 
-	public void addRequest(Request request) {
-		requests.add(request);
-	}
-
-        public Request getLastPendingRequest() {
-		for (Request request : requests)
-			if (request.isPending())
-				return request;
-                return null;
-        }
-
-        public void reject() {
-                leavesQty = 0;
-                terminalStatus = Rejected;
+        public OrdStatus getOrdStatus(Order order) {
+		return
+                 pendingOrdStatus != null  ? pendingOrdStatus :
+                 terminalOrdStatus != null ? terminalOrdStatus :
+                        cumQty >= orderQty ? OrdStatus.Filled :
+                                cumQty > 0 ? OrdStatus.PartiallyFilled
+                                           : OrdStatus.New;
         }
 
         public void done() {
                 leavesQty = 0;
-                terminalStatus = DoneForDay;
+                terminalOrdStatus = OrdStatus.DoneForDay;
         }
 
+	public Request.List getPendingRequests() {
+		return requests;
+	}
+
 	public OrdStatus getTerminalStatus() {
-		return terminalStatus;
+		return terminalOrdStatus;
 	}
 
 	public long getOrderQty() {

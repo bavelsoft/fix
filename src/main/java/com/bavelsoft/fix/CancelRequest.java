@@ -1,6 +1,7 @@
 package com.bavelsoft.fix;
 
-import static com.bavelsoft.fix.OrdStatus.PendingCancel;
+import com.bavelsoft.fix.OrdStatus;
+import com.bavelsoft.fix.ExecType;
 
 public class CancelRequest extends Request {
 	public CancelRequest(Order order, String clOrdID) {
@@ -8,13 +9,28 @@ public class CancelRequest extends Request {
 	}
 
 	@Override
-        protected OrdStatus getPendingOrdStatus() {
-                return PendingCancel;
+        protected void onAccept() {
+                getOrder().cancel();
         }
 
 	@Override
-        protected void onAccept() {
-                getOrder().cancel();
+        protected OrdStatus getPendingOrdStatus() {
+                return OrdStatus.PendingCancel;
+        }
+
+	@Override
+        protected ExecType getPendingExecType() {
+                return ExecType.PendingCancel;
+        }
+
+	@Override
+        protected ExecType getAcceptedExecType() {
+                return ExecType.Canceled;
+        }
+
+	@Override
+        protected void addObserver() {
+		//accept if the order is cancelled, filled
         }
 }
 

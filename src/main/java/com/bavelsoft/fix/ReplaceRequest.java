@@ -1,6 +1,7 @@
 package com.bavelsoft.fix;
 
-import static com.bavelsoft.fix.OrdStatus.PendingReplace;
+import com.bavelsoft.fix.OrdStatus;
+import com.bavelsoft.fix.ExecType;
 
 public class ReplaceRequest extends Request {
 	private Object fields;
@@ -13,14 +14,33 @@ public class ReplaceRequest extends Request {
         }
 
 	@Override
-        protected OrdStatus getPendingOrdStatus() {
-                return PendingReplace;
-        }
-
-	@Override
         protected void onAccept() {
                 getOrder().replace(fields, orderQty);
         }
+
+	@Override
+	void updateAsLast() {
+		getOrder().pendingOrdStatus = getPendingOrdStatus();
+		getOrder().pendingOrderQty = orderQty;
+	}
+
+	@Override
+        protected OrdStatus getPendingOrdStatus() {
+                return OrdStatus.PendingReplace;
+        }
+
+	@Override
+        protected ExecType getPendingExecType() {
+                return ExecType.PendingReplace;
+        }
+
+	@Override
+        protected ExecType getAcceptedExecType() {
+                return ExecType.Replaced;
+        }
+
+	@Override
+        protected void addObserver() {
+		//reject if the order is cancelled, filled
+        }
 }
-
-

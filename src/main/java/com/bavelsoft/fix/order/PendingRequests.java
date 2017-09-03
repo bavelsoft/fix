@@ -23,6 +23,6 @@ public class PendingRequests {
 
 	private void updateOrderWith(Request request) {
 		order.pendingOrdStatus = request == null ? null : request.getPendingOrdStatus();
-		order.pendingOrderQty = request == null ? 0 : request.getOrderQty();
+		order.pendingOrderQty = request == null ? 0 : request.getPendingOrderQty();
 	}
 }

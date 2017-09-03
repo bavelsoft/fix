@@ -1,4 +1,4 @@
-package com.bavelsoft.fix;
+package com.bavelsoft.fix.request;
 
 import com.bavelsoft.fix.OrdStatus;
 import com.bavelsoft.fix.ExecType;
@@ -7,17 +7,17 @@ import com.bavelsoft.fix.order.Order;
 
 public class ReplaceRequest extends Request {
 	private Object fields;
-	private long orderQty;
+	private long pendingOrderQty;
 
-        public ReplaceRequest(Order order, String clOrdID, Object fields, long orderQty) {
+        public ReplaceRequest(Order order, String clOrdID, Object fields, long pendingOrderQty) {
                 super(order, clOrdID);
                 this.fields = fields;
-                this.orderQty = orderQty;
+                this.pendingOrderQty = pendingOrderQty;
         }
 
 	@Override
         protected void onAccept() {
-                getOrder().replace(fields, orderQty);
+                getOrder().replace(fields, pendingOrderQty);
         }
 
 	@Override
@@ -41,7 +41,7 @@ public class ReplaceRequest extends Request {
         }
 
 	@Override
-	public long getOrderQty() {
-		return orderQty;
+	public long getPendingOrderQty() {
+		return pendingOrderQty;
 	}
 }

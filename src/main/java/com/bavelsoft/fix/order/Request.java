@@ -10,7 +10,7 @@ public abstract class Request {
 
         protected void onAccept() {}
         protected void onReject() {}
-	protected long getOrderQty() { return 0; }
+	protected long getPendingOrderQty() { return 0; }
         protected abstract OrdStatus getPendingOrdStatus();
 	protected abstract ExecType getPendingExecType();
 	protected abstract ExecType getAcceptedExecType();

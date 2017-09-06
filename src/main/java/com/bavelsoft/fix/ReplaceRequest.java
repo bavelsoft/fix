@@ -1,9 +1,9 @@
-package com.bavelsoft.fix.request;
+package com.bavelsoft.fix;
 
 import com.bavelsoft.fix.OrdStatus;
 import com.bavelsoft.fix.ExecType;
-import com.bavelsoft.fix.order.Request;
-import com.bavelsoft.fix.order.Order;
+import com.bavelsoft.fix.Request;
+import com.bavelsoft.fix.Order;
 
 public class ReplaceRequest extends Request {
 	private Object fields;

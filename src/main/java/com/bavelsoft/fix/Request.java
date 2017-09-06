@@ -1,20 +1,20 @@
-package com.bavelsoft.fix.order;
+package com.bavelsoft.fix;
 
-import java.util.LinkedList;
 import com.bavelsoft.fix.OrdStatus;
 import com.bavelsoft.fix.ExecType;
 
 public abstract class Request {
         private String clOrdID;
         private Order order;
+	private boolean isPending = true;
 
         protected void onAccept() {}
         protected void onReject() {}
-	protected long getPendingOrderQty() { return 0; }
+	public long getPendingOrderQty() { return 0; }
         protected abstract OrdStatus getPendingOrdStatus();
 	protected abstract ExecType getPendingExecType();
 	protected abstract ExecType getAcceptedExecType();
-	protected abstract void addObserver();
+        protected abstract void addObserver();
 
         public Request(Order order, String clOrdID) {
                 this.order = order;
@@ -22,14 +22,18 @@ public abstract class Request {
         }
 
         public void accept() {
-		order.getPendingRequests().remove(this);
+		isPending = false;
                 onAccept();
         }
 
         public void reject() {
-		order.getPendingRequests().remove(this);
+		isPending = false;
                 onReject();
         }
+
+	public boolean isPending() {
+		return isPending;
+	}
 
 	public Order getOrder() {
 		return order;

@@ -1,6 +1,6 @@
 package com.bavelsoft.fix;
 
-import com.bavelsoft.fix.order.Order;
+import com.bavelsoft.fix.Order;
 
 public class Execution {
 	private Order order;

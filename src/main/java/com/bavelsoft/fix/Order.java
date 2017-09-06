@@ -1,20 +1,17 @@
-package com.bavelsoft.fix.order;
+package com.bavelsoft.fix;
 
-import java.util.List;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import com.bavelsoft.fix.OrdStatus;
 
 public class Order {
         private Object fields;
 	private String orderID;
         private double avgPx;
-        private long orderQty, cumQty, leavesQty;
-	private OrdStatus terminalOrdStatus;
-	private PendingRequests pendingRequests = new PendingRequests(this);
-	long pendingOrderQty;
-        OrdStatus pendingOrdStatus;
+        private long orderQty, cumQty, leavesQty, pendingOrderQty;
+	private OrdStatus terminalOrdStatus, pendingOrdStatus;
+	private LinkedList<Request> requests = new LinkedList<>();
 
-        public void fill(long qty, double price) {
+        void fill(long qty, double price) {
 		double totalValue = qty * price + this.cumQty * this.avgPx;
                 this.avgPx = totalValue / (this.cumQty + qty);
                 this.cumQty += qty;
@@ -40,12 +37,23 @@ public class Order {
 
         public OrdStatus getOrdStatus(Order order) {
 		return
-                  pendingOrdStatus != null ? pendingOrdStatus :
-                 terminalOrdStatus != null ? terminalOrdStatus :
-                        cumQty >= orderQty ? OrdStatus.Filled :
-                                cumQty > 0 ? OrdStatus.PartiallyFilled
-                                           : OrdStatus.New;
+                    terminalOrdStatus != null ? terminalOrdStatus :
+                     pendingOrdStatus != null ? pendingOrdStatus :
+                           cumQty >= orderQty ? OrdStatus.Filled :
+                                   cumQty > 0 ? OrdStatus.PartiallyFilled
+                                              : OrdStatus.New;
         }
+
+	public void updateWithRequest(Request request) {
+		if (request.isPending()) {
+			requests.add(request);
+			//TODO observers
+		} else {
+			requests.remove(request);
+		}
+		pendingOrdStatus = requests.isEmpty() ? null : requests.getLast().getPendingOrdStatus();
+		pendingOrderQty = requests.stream().mapToLong(x->x.getPendingOrderQty()).max().orElse(0);
+	}
 
         public void done() {
                 leavesQty = 0;
@@ -56,10 +64,6 @@ public class Order {
                 leavesQty = 0;
                 terminalOrdStatus = OrdStatus.Rejected;
         }
-
-	public PendingRequests getPendingRequests() {
-		return pendingRequests;
-	}
 
 	public OrdStatus getTerminalStatus() {
 		return terminalOrdStatus;

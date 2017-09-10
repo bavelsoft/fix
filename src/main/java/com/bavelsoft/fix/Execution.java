@@ -14,14 +14,15 @@ public class Execution {
         }
 
         public void cancel() {
-                order.fill(-qty, price);
+		qty = -qty;
+                order.fill(this);
         }
 
         public void correct(long qty, double price) {
                 cancel();
                 this.qty = qty;
                 this.price = price;
-                order.fill(qty, price);
+                order.fill(this);
         }
 
 	public Order getOrder() {

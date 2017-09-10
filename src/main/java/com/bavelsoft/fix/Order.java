@@ -9,13 +9,13 @@ public class Order {
         private double avgPx;
         private long orderQty, cumQty, leavesQty, pendingOrderQty;
 	private OrdStatus terminalOrdStatus, pendingOrdStatus;
-	private LinkedList<Request> requests = new LinkedList<>();
+	private PendingRequests pendingRequests = new PendingRequests();
 
-        void fill(long qty, double price) {
-		double totalValue = qty * price + this.cumQty * this.avgPx;
-                this.avgPx = totalValue / (this.cumQty + qty);
-                this.cumQty += qty;
-                this.leavesQty -= qty;
+        public void fill(Execution x) {
+		double totalValue = x.getQty() * x.getPrice() + this.cumQty * this.avgPx;
+                this.avgPx = totalValue / (this.cumQty + x.getQty());
+                this.cumQty += x.getQty();
+                this.leavesQty -= x.getQty();
         }
 
         public void replace(Object newFields, long newOrderQty) {
@@ -45,14 +45,10 @@ public class Order {
         }
 
 	public void updateWithRequest(Request request) {
-		if (request.isPending()) {
-			requests.add(request);
-			//TODO observers
-		} else {
-			requests.remove(request);
-		}
-		pendingOrdStatus = requests.isEmpty() ? null : requests.getLast().getPendingOrdStatus();
-		pendingOrderQty = requests.stream().mapToLong(x->x.getPendingOrderQty()).max().orElse(0);
+		pendingRequests.addOrRemove(request);
+		pendingOrdStatus = pendingRequests.getOrdStatus();
+		pendingOrderQty = pendingRequests.getMaxOrderQty();
+		//TODO observers
 	}
 
         public void done() {
@@ -64,10 +60,6 @@ public class Order {
                 leavesQty = 0;
                 terminalOrdStatus = OrdStatus.Rejected;
         }
-
-	public OrdStatus getTerminalStatus() {
-		return terminalOrdStatus;
-	}
 
 	public long getOrderQty() {
 		return orderQty;

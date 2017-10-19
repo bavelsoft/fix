@@ -29,10 +29,5 @@ public class CancelRequest extends Request {
         protected ExecType getAcceptedExecType() {
                 return ExecType.Canceled;
         }
-
-	@Override
-        protected void addObserver() {
-		//accept if the order is cancelled, filled
-        }
 }
 

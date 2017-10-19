@@ -14,7 +14,6 @@ public abstract class Request {
         protected abstract OrdStatus getPendingOrdStatus();
 	protected abstract ExecType getPendingExecType();
 	protected abstract ExecType getAcceptedExecType();
-        protected abstract void addObserver();
 
         public Request(Order order, String clOrdID) {
                 this.order = order;

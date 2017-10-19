@@ -29,9 +29,4 @@ public class NewRequest extends Request {
         protected ExecType getAcceptedExecType() {
                 return ExecType.New;
         }
-
-	@Override
-        protected void addObserver() {
-		//accept if the order is filled
-        }
 }

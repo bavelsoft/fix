@@ -36,11 +36,6 @@ public class ReplaceRequest extends Request {
         }
 
 	@Override
-        protected void addObserver() {
-		//reject if the order is cancelled, filled
-        }
-
-	@Override
 	public long getPendingOrderQty() {
 		return pendingOrderQty;
 	}

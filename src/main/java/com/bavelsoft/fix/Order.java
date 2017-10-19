@@ -48,7 +48,6 @@ public class Order {
 		pendingRequests.addOrRemove(request);
 		pendingOrdStatus = pendingRequests.getOrdStatus();
 		pendingOrderQty = pendingRequests.getMaxOrderQty();
-		//TODO observers
 	}
 
         public void done() {

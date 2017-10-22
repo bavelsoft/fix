@@ -12,17 +12,17 @@ public class Order {
 	private PendingRequests pendingRequests = new PendingRequests();
 
         public void fill(Execution x) {
-		double totalValue = x.getQty() * x.getPrice() + this.cumQty * this.avgPx;
-                this.avgPx = totalValue / (this.cumQty + x.getQty());
-                this.cumQty += x.getQty();
-                this.leavesQty -= x.getQty();
+		double totalValue = x.getQty() * x.getPrice() + cumQty * avgPx;
+                avgPx = totalValue / (cumQty + x.getQty());
+                cumQty += x.getQty();
+                leavesQty -= x.getQty();
         }
 
-        public void replace(Object newFields, long newOrderQty) {
-		newOrderQty = Math.max(newOrderQty, cumQty);
-		this.leavesQty += newOrderQty - orderQty;
-                this.orderQty = newOrderQty;
-                this.fields = newFields;
+        public void replace(Object newFields, long requestedOrderQty) {
+		long newOrderQty = Math.max(requestedOrderQty, cumQty);
+		leavesQty += newOrderQty - orderQty;
+                orderQty = newOrderQty;
+                fields = newFields;
         }
 
         public void cancel() {

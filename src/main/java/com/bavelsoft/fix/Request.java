@@ -22,11 +22,13 @@ public abstract class Request {
 
         public void accept() {
 		isPending = false;
+		order.updateWithRequest(this);
                 onAccept();
         }
 
         public void reject() {
 		isPending = false;
+		order.updateWithRequest(this);
                 onReject();
         }
 

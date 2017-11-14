@@ -1,6 +1,5 @@
 package com.bavelsoft.fix;
 
-import java.util.LinkedList;
 import com.bavelsoft.fix.OrdStatus;
 
 public class Order {

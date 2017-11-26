@@ -6,18 +6,18 @@ import com.bavelsoft.fix.Request;
 import com.bavelsoft.fix.Order;
 
 public class ReplaceRequest extends Request {
-	private Object fields;
+	private Object pendingFields;
 	private long pendingOrderQty;
 
-        public ReplaceRequest(Order order, String clOrdID, Object fields, long pendingOrderQty) {
+        public ReplaceRequest(Order order, String clOrdID, Object pendingFields, long pendingOrderQty) {
                 super(order, clOrdID);
-                this.fields = fields;
+                this.pendingFields = pendingFields;
                 this.pendingOrderQty = pendingOrderQty;
         }
 
 	@Override
         protected void onAccept() {
-                getOrder().replace(fields, pendingOrderQty);
+                getOrder().replace(pendingFields, pendingOrderQty);
         }
 
 	@Override

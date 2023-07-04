@@ -31,14 +31,14 @@ public class OrderTest {
 	public void setup() {
 		clientOrderRepo = new OrderRepo() {{
 			map = new HashMap();
-			pool = new OrderPool(new ArrayList(), 10);
+			pool = new SimplePool(new ArrayList(), ()->new Order<ClientFields>(), 10);
 			idgen = idgen;
 			requestRepo = clientRequestRepo;
 		}};
 
 		exchangeOrderRepo = new OrderRepo() {{
 			map = new HashMap();
-			pool = new OrderPool(new ArrayList(), 10);
+			pool = new SimplePool(new ArrayList(), ()->new Order<ExchangeFields>(), 10);
 			idgen = idgen;
 			requestRepo = exchangeRequestRepo;
 		}};

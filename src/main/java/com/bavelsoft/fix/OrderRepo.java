@@ -7,7 +7,7 @@ public class OrderRepo<F> {
 	@Inject
 	protected Map<Long, Order<F>> map;
 	@Inject
-	protected OrderPool<F> pool;
+	protected SimplePool<Order<F>> pool;
 	@Inject
 	protected IdGenerator idgen = new IdGenerator();
 	@Inject
@@ -15,7 +15,7 @@ public class OrderRepo<F> {
 
 	public Order<F> requestNew(F fields, long orderQty, String clOrdID) {
 		long orderID = idgen.getOrderID();
-		Order<F> order = pool.getOrder();
+		Order<F> order = pool.acquire();
 		map.put(orderID, order.init(fields, orderID, orderQty));
 		requestRepo.request(order.newRequest, clOrdID); //TODO this is convenient, but is it "right"? could imagine orders without newRequests :)
 		return order;

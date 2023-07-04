@@ -19,6 +19,7 @@ public class Execution {
 
         public void bust() {
 		qty = -qty;
+		//TODO some venues want to call order.cancel(qty) here too
                 order.fill(qty, price);
         }
 

@@ -79,10 +79,27 @@ public class Order<F> {
 		terminate(OrdStatus.DoneForDay);
 	}
 
-	private void terminate(OrdStatus status) {
+	protected void terminate(OrdStatus status) {
 		terminalOrdStatus = status;
 		leavesQty = 0;
 		resetRequests();
+	}
+
+	public CharSequence getClOrdID() {
+		if (cancelRequest.isAccepted()) {
+			return cancelRequest.getClOrdID();
+		} else if (replaceRequest.isAccepted()) {
+			return replaceRequest.getClOrdID();
+		} else {
+			return newRequest.getClOrdID();
+		}
+	}
+
+	/**
+	 * @return whether the sell-side triggered this call in an expected way
+	 */
+	public boolean exec(ExecType execType, CharSequence clOrdID) {
+		return FixOrderUtil.exec(this, execType, clOrdID);
 	}
 
 	public long getOrderID() {
@@ -103,59 +120,5 @@ public class Order<F> {
 
 	public double getAvgPx() {
 		return avgPx;
-	}
-
-	public CharSequence getClOrdID() {
-		if (cancelRequest.isAccepted()) {
-			return cancelRequest.getClOrdID();
-		} else if (replaceRequest.isAccepted()) {
-			return replaceRequest.getClOrdID();
-		} else {
-			return newRequest.getClOrdID();
-		}
-	}
-
-	/**
-	 * @return whether the sell-side triggered this call in an expected way
-	 */
-	public boolean exec(ExecType execType, CharSequence clOrdID) {
-		switch (execType) {
-			case Rejected:
-				if (getOrdStatus() == OrdStatus.PendingNew) {
-					newRequest.reject();
-					return true;
-				} else {
-					cancel();
-					return false;
-				}
-			case New:
-				return accept(newRequest, clOrdID);
-			case Replaced:
-				return accept(replaceRequest, clOrdID);
-			case Canceled:
-				if (!accept(cancelRequest, clOrdID)) {
-					cancel();
-				}
-				//TODO return false if clOrdID wasn't the last acked clOrdID
-				return true;
-			case DoneForDay:
-				done();
-				return true;
-			case PendingNew:
-			case PendingReplace:
-			case PendingCancel:
-				return true; //ignore
-			default:
-				return false;
-		}
-	}
-
-	private boolean accept(Request request, CharSequence clOrdID) {
-		if (request.isPending()) {
-			request.accept();
-			return request.getClOrdID().equals(clOrdID);
-		} else {
-			return false;
-		}
 	}
 }

@@ -6,8 +6,9 @@ import com.bavelsoft.fix.ExecType;
 public abstract class Request {
         public final Order<?> order;
 
-        private CharSequence clOrdID;
-	private boolean isPending;
+        private CharSequence clOrdID, origClOrdID;
+	enum Status { Pending, Accepted, None }
+	private Status status;
 
         public Request(Order<?> order) {
                 this.order = order;
@@ -15,28 +16,42 @@ public abstract class Request {
         }
 
 	public void reset() {
-		isPending = false;
+		status = Status.None;
+		clOrdID = null;
+		origClOrdID = null;
 	}
 
 	public Request init(CharSequence clOrdID) {
-		isPending = true;
+		status = Status.Pending;
 		this.clOrdID = clOrdID;
+		this.origClOrdID = order.replaceRequest.getClOrdID();
+		if (this.origClOrdID == null) {
+			this.origClOrdID = order.newRequest.getClOrdID();
+		}
 		return this;
 	}
 
         public void reject() {
-		isPending = false;
+		reset();
         }
 
         public void accept() {
-		isPending = false;
+		status = Status.Accepted;
         }
 
 	public boolean isPending() {
-		return isPending;
+		return status == Status.Pending;
+	}
+
+	public boolean isAccepted() {
+		return status == Status.Accepted;
 	}
 
 	public CharSequence getClOrdID() {
 		return clOrdID;
+	}
+
+	public CharSequence getOrigClOrdID() {
+		return origClOrdID;
 	}
 }

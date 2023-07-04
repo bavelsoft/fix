@@ -105,6 +105,16 @@ public class Order<F> {
 		return avgPx;
 	}
 
+	public CharSequence getClOrdID() {
+		if (cancelRequest.isAccepted()) {
+			return cancelRequest.getClOrdID();
+		} else if (replaceRequest.isAccepted()) {
+			return replaceRequest.getClOrdID();
+		} else {
+			return newRequest.getClOrdID();
+		}
+	}
+
 	/**
 	 * @return whether the sell-side triggered this call in an expected way
 	 */

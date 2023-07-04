@@ -6,30 +6,11 @@ import com.bavelsoft.fix.Request;
 import com.bavelsoft.fix.Order;
 
 public class RequestNew extends Request {
-	private OrdStatus status;
-
 	public RequestNew(Order<?> order) {
 	        super(order);
 	}
 
-	@Override
-	public void reset() {
-		status = OrdStatus.PendingNew;
-	}
-
-	@Override
-	public void accept() {
-		super.reject();
-		status = OrdStatus.New;
-	}
-
-	@Override
-	public void reject() {
-		super.reject();
-		status = OrdStatus.Rejected;
-	}
-
         protected OrdStatus getStatus() {
-                return status;
+                return isAccepted() ? OrdStatus.New : isPending() ? OrdStatus.PendingNew : OrdStatus.Rejected;
         }
 }

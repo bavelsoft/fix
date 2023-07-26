@@ -5,7 +5,7 @@ import com.bavelsoft.fix.OrdStatus;
 //TODO another generic for things that change not according to replaces? or let them compose/extend us? listeners?
 
 public class Order<F> {
-	private F fields;
+	F fields;
 	private long orderID, orderQty, leavesQty, cumQty;
 	private double avgPx;
 	private OrdStatus terminalOrdStatus;
@@ -51,10 +51,6 @@ public class Order<F> {
 		}
 	}
 
-	public long getWorkingQty() {
-		return replaceRequest.getWorkingQty();
-	}
-
 	public void cancel() {
 		cancel(leavesQty);
 	}
@@ -83,16 +79,6 @@ public class Order<F> {
 		terminalOrdStatus = status;
 		leavesQty = 0;
 		resetRequests();
-	}
-
-	public CharSequence getClOrdID() {
-		if (cancelRequest.isAccepted()) {
-			return cancelRequest.getClOrdID();
-		} else if (replaceRequest.isAccepted()) {
-			return replaceRequest.getClOrdID();
-		} else {
-			return newRequest.getClOrdID();
-		}
 	}
 
 	/**

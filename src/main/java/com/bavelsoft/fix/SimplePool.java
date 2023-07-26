@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class SimplePool<T> {
-	private final List<T> pool;
+	final List<T> pool;
 	private final Supplier<T> constructor;
 
 	//search for Field Declaration, Type Parameter, Usage in extends/implements clauses of the class and its interfaces 

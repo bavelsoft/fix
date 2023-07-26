@@ -3,25 +3,29 @@ package com.bavelsoft.fix;
 import java.util.Map;
 import javax.inject.Inject;
 
-public class OrderRepo<F> {
-	@Inject
-	protected Map<Long, Order<F>> map;
-	@Inject
-	protected SimplePool<Order<F>> pool;
-	@Inject
-	protected IdGenerator idgen = new IdGenerator();
-	@Inject
-	protected RequestRepo requestRepo;
+public class OrderRepo<O extends Order<F>, F> {
+	private final Map<Long, O> map; //TODO garbage!
+	private final SimplePool<O> pool;
+	private final IdGenerator idgen;
+	private final RequestRepo requestRepo;
 
-	public Order<F> requestNew(F fields, long orderQty, String clOrdID) {
+	public OrderRepo(Map<Long, O> map, SimplePool<O> pool, IdGenerator idgen, RequestRepo requestRepo) {
+		this.map = map;
+		this.pool = pool;
+		this.idgen = idgen;
+		this.requestRepo = requestRepo;
+	}
+
+	public O requestNew(F fields, long orderQty, String clOrdID) {
 		long orderID = idgen.getOrderID();
-		Order<F> order = pool.acquire();
-		map.put(orderID, order.init(fields, orderID, orderQty));
-		requestRepo.request(order.newRequest, clOrdID); //TODO this is convenient, but is it "right"? could imagine orders without newRequests :)
+		O order = pool.acquire();
+		order.init(fields, orderID, orderQty);
+		map.put(orderID, order);
+		requestRepo.request(order.newRequest, clOrdID);
 		return order;
 	}
 
-	public void removeIfClosed(Order<F> order) {
+	public void removeIfClosed(O order) {
 		if (order.getLeavesQty() == 0) {
 			map.remove(order.getOrderID());
 			requestRepo.remove(order.newRequest);
@@ -29,6 +33,14 @@ public class OrderRepo<F> {
 			requestRepo.remove(order.cancelRequest);
 			pool.release(order);
 		}
+	}
+
+	public O get(long id) {
+		return map.get(id);
+	}
+
+	public Iterable<O> all() {
+		return pool.pool;
 	}
 }
 

@@ -9,29 +9,37 @@ import java.util.function.Supplier;
 public class ChildOrderRepo<O extends ChildOrder<F>, F> {
 	private final OrderRepo<O, F> orderRepo;
 	private final IdGenerator idgen;
-	private final ChildByParentRepo children;
+	private final ChildByParentRepo childrenByParent;
 
-	public ChildOrderRepo(OrderRepo<O, F> orderRepo, IdGenerator idgen, ChildByParentRepo children) {
+	public ChildOrderRepo(OrderRepo<O, F> orderRepo, IdGenerator idgen, ChildByParentRepo childrenByParent) {
 		this.orderRepo = orderRepo;
 		this.idgen = idgen;
-		this.children = children;
+		this.childrenByParent = childrenByParent;
+		orderRepo.requestRepo.invariants = childrenByParent;
 	}
 
-	public O requestNew(Order<?> parent, F fields, long orderQty) {
+	public O requestNew(F fields, long orderQty, Order<?> parent) {
 		O child = orderRepo.requestNew(fields, orderQty, idgen.getClOrdID());
-		children.add(parent, child);
+		childrenByParent.add(parent, child);
 
 		return child;
 	}
 
-	//TODO how to make sure parent is not removed until all children are removed?
-	public void removeIfClosed(O order) {
-		orderRepo.removeIfClosed(order);
-		children.removeIfClosed(order);
+	public void removeIfTerminal(O order) {
+		orderRepo.removeIfTerminal(order);
+		childrenByParent.removeIfTerminal(order);
 	}
 
 	public O get(long id) {
 		return orderRepo.get(id);
+	}
+
+	public Collection<ChildOrder> get(Order parent) {
+		return childrenByParent.get(parent);
+	}
+
+	public long getChildWorkingQty(Order parent) {
+		return childrenByParent.getChildWorkingQty(parent);
 	}
 }
 

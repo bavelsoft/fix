@@ -1,21 +1,24 @@
 package com.bavelsoft.fix;
 
 import com.bavelsoft.fix.OrdStatus;
+import java.util.function.Consumer;
 
 //TODO another generic for things that change not according to replaces? or let them compose/extend us? listeners?
 
 public class Order<F> {
-	F fields;
-	private long orderID, orderQty, leavesQty, cumQty;
+	private long orderID;
+	private F fields;
+	private long orderQty, leavesQty, cumQty;
 	private double avgPx;
 	private OrdStatus terminalOrdStatus;
 	final RequestNew newRequest = new RequestNew(this);
 	final RequestReplace replaceRequest = new RequestReplace(this);
 	final RequestCancel cancelRequest = new RequestCancel(this);
+	Consumer<Order> invariants = o->{};
 
-	public Order<F> init(F newFields, long orderID, long requestedOrderQty) {
-		this.fields = newFields;
+	public Order<F> init(long orderID, F newFields, long requestedOrderQty) {
 		this.orderID = orderID;
+		this.fields = newFields;
 		this.orderQty = requestedOrderQty;
 		this.leavesQty = requestedOrderQty;
 		this.cumQty = 0;
@@ -49,6 +52,7 @@ public class Order<F> {
 		if (leavesQty <= 0) {
 			terminate(OrdStatus.Filled);
 		}
+		invariants.accept(this);
 	}
 
 	public void cancel() {
@@ -79,13 +83,7 @@ public class Order<F> {
 		terminalOrdStatus = status;
 		leavesQty = 0;
 		resetRequests();
-	}
-
-	/**
-	 * @return whether the sell-side triggered this call in an expected way
-	 */
-	public boolean exec(ExecType execType, CharSequence clOrdID) {
-		return FixOrderUtil.exec(this, execType, clOrdID);
+		invariants.accept(this);
 	}
 
 	public long getOrderID() {

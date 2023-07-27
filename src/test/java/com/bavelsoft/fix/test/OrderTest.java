@@ -20,19 +20,23 @@ class ExchangeFields {
 }
 
 public class OrderTest {
-	private RequestRepo clientRequestRepo = new RequestRepo(new HashMap());
-	private RequestRepo exchangeRequestRepo = new RequestRepo(new HashMap());
+	private RequestRepo clientRequestRepo;
+	private RequestRepo exchangeRequestRepo;
 	private OrderRepo clientOrderRepo;
 	private ChildOrderRepo exchangeOrderRepo;
-	private IdGenerator idgenerator = new IdGenerator();
+	private ChildOrderService orderService;
+	private IdGenerator idgen;
 
 	@BeforeEach
 	public void setup() {
-		clientOrderRepo = new OrderRepo(new HashMap(), new SimplePool(new ArrayList(), ()->new Order<ClientFields>(), 10), idgenerator, clientRequestRepo);
-
+		idgen = new IdGenerator();
+		clientRequestRepo = new RequestRepo(new HashMap());
+		exchangeRequestRepo = new RequestRepo(new HashMap());
+		clientOrderRepo = new OrderRepo(new HashMap(), new SimplePool(new ArrayList(), ()->new Order<ClientFields>(), 10), idgen, clientRequestRepo);
 		exchangeOrderRepo = new ChildOrderRepo(
-			new OrderRepo(new HashMap(), new SimplePool(new ArrayList(), ()->new ChildOrder<ExchangeFields>(), 10), idgenerator, exchangeRequestRepo),
-			idgenerator, new ChildByParentRepo(new HashMap(), clientOrderRepo, ()->new ArrayList<>()));
+			new OrderRepo(new HashMap(), new SimplePool(new ArrayList(), ()->new ChildOrder<ExchangeFields>(), 10), idgen, exchangeRequestRepo),
+			idgen, new ChildByParentRepo(new HashMap(), clientOrderRepo, ()->new ArrayList<>()));
+		orderService = new ChildOrderService(idgen, exchangeRequestRepo, exchangeOrderRepo);
 	}
 
 	private void givenClientOrder(String clOrdID) {
@@ -42,7 +46,7 @@ public class OrderTest {
 	private ChildOrder<ExchangeFields> givenExchangeOrder() {
 		givenClientOrder("111_clOrdID_from_client");
 		Order parent = clientRequestRepo.get("111_clOrdID_from_client").order;
-		return exchangeOrderRepo.requestNew(parent, new ExchangeFields(), 100);
+		return exchangeOrderRepo.requestNew(new ExchangeFields(), 100, parent);
 	}
 	
 	@Test
@@ -108,7 +112,7 @@ public class OrderTest {
 		Order parent = clientRequestRepo.get("111_clOrdID_from_client").order;
 
 		ExchangeFields fields = new ExchangeFields();
-		ChildOrder<ExchangeFields> order = exchangeOrderRepo.requestNew(parent, fields, 100);
+		ChildOrder<ExchangeFields> order = exchangeOrderRepo.requestNew(fields, 100, parent);
 
 		assertEquals(OrdStatus.PendingNew, order.getOrdStatus());
 		assertEquals(100, order.getWorkingQty());
@@ -118,7 +122,7 @@ public class OrderTest {
 	public void testExchangeCancelRequest() {
 		ChildOrder<ExchangeFields> order = givenExchangeOrder();
 
-		exchangeRequestRepo.requestCancel(order, idgenerator.getClOrdID());
+		exchangeRequestRepo.requestCancel(order, idgen.getClOrdID());
 
 		assertEquals(OrdStatus.PendingCancel, order.getOrdStatus());
 	}
@@ -127,7 +131,7 @@ public class OrderTest {
 	public void testExchangeReplaceRequest() {
 		ChildOrder<ExchangeFields> order = givenExchangeOrder();
 
-		RequestReplace<ExchangeFields> replaceRequest = exchangeRequestRepo.requestReplace(order, idgenerator.getClOrdID());
+		RequestReplace<ExchangeFields> replaceRequest = exchangeRequestRepo.requestReplace(order, idgen.getClOrdID());
 		ExchangeFields newFields = new ExchangeFields();
 		newFields.price = 2;
 		replaceRequest.pendingOrderQty = 120;
@@ -141,7 +145,7 @@ public class OrderTest {
 		CharSequence clOrdID = givenExchangeOrder().getClOrdID();
 
 		Order order = exchangeRequestRepo.get(clOrdID).order;
-		boolean success = order.exec(ExecType.New, clOrdID);
+		boolean success = FixOrderUtil.exec(order, ExecType.New, clOrdID);
 
 		assertEquals(true, success);
 		assertEquals(OrdStatus.New, order.getOrdStatus());
@@ -152,10 +156,21 @@ public class OrderTest {
 		CharSequence clOrdID = givenExchangeOrder().getClOrdID();
 
 		Order order = exchangeRequestRepo.get(clOrdID).order;
-		boolean success = order.exec(ExecType.Rejected, clOrdID);
+		boolean success = FixOrderUtil.exec(order, ExecType.Rejected, clOrdID);
 
 		assertEquals(true, success);
 		assertEquals(OrdStatus.Rejected, order.getOrdStatus());
+	}
+
+	@Test
+	public void testFullFill() {
+		givenClientOrder("111_clOrdID_from_client");
+		Order parent = clientRequestRepo.get("111_clOrdID_from_client").order;
+
+		ChildOrder<ExchangeFields> order = exchangeOrderRepo.requestNew(new ExchangeFields(), 100, parent);
+		order.fill(100, 1.0);
+		exchangeOrderRepo.removeIfTerminal(order);
+		//TODO test that both got evicted
 	}
 }
 

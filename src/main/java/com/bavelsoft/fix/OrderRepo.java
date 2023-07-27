@@ -4,10 +4,10 @@ import java.util.Map;
 import javax.inject.Inject;
 
 public class OrderRepo<O extends Order<F>, F> {
-	private final Map<Long, O> map; //TODO garbage!
+	private final Map<Long, O> map; //TODO garbage! also, figure out whether this is fix or internal
 	private final SimplePool<O> pool;
 	private final IdGenerator idgen;
-	private final RequestRepo requestRepo;
+	final RequestRepo requestRepo;
 
 	public OrderRepo(Map<Long, O> map, SimplePool<O> pool, IdGenerator idgen, RequestRepo requestRepo) {
 		this.map = map;
@@ -19,16 +19,16 @@ public class OrderRepo<O extends Order<F>, F> {
 	public O requestNew(F fields, long orderQty, String clOrdID) {
 		long orderID = idgen.getOrderID();
 		O order = pool.acquire();
-		order.init(fields, orderID, orderQty);
+		order.init(orderID, fields, orderQty);
 		map.put(orderID, order);
-		requestRepo.request(order.newRequest, clOrdID);
+		requestRepo.requestNew(order, clOrdID);
 		return order;
 	}
 
-	public void removeIfClosed(O order) {
+	public void removeIfTerminal(O order) {
 		if (order.getLeavesQty() == 0) {
 			map.remove(order.getOrderID());
-			requestRepo.remove(order.newRequest);
+			requestRepo.remove(order.newRequest); //this is the reason OrderRepo depends on RequestRepo and not v.v.
 			requestRepo.remove(order.replaceRequest);
 			requestRepo.remove(order.cancelRequest);
 			pool.release(order);

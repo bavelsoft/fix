@@ -9,41 +9,42 @@ import java.util.function.Supplier;
 public class ChildOrderService {
 	private final IdGenerator idgen;
 	private final RequestRepo requestRepo;
-	private final OrderRepo parentOrderRepo;
-	private final ChildByParentRepo children;
+	private final ChildOrderRepo childOrderRepo;
+	private final ParentCanceller parentCanceller = new ParentCanceller();
 
-	final ParentCanceller parentCanceller = new ParentCanceller();
-
-	public ChildOrderService(IdGenerator idgen, RequestRepo requestRepo, OrderRepo parentOrderRepo, ChildByParentRepo children) {
+	public ChildOrderService(IdGenerator idgen, RequestRepo requestRepo, ChildOrderRepo childOrderRepo) {
 		this.idgen = idgen;
 		this.requestRepo = requestRepo;
-		this.parentOrderRepo = parentOrderRepo;
-		this.children = children;
+		this.childOrderRepo = childOrderRepo;
 	}
 
 	class ParentCanceller {
 		public void accept(ChildOrder order) {
 			Order parent = order.getParent();
-			if (getChildWorkingQty(parent) == 0) {
+			if (childOrderRepo.getChildWorkingQty(parent) == 0) {
 				parent.cancel();
-				parentOrderRepo.removeIfClosed(parent);
 			}
 		}
 	}
 
 	public void cancelFamily(Order<?> parent) {
-		for (ChildOrder child : children.get(parent)) {
-			requestRepo.requestCancel(child, idgen.getClOrdID());
+		Collection<ChildOrder> children = childOrderRepo.get(parent);
+		if (children.isEmpty()) {
+			parent.cancel();
+			return;
+		}
+		for (ChildOrder<?> child : children) {
 			child.parentCanceller = parentCanceller;
+			requestRepo.requestCancel(child, idgen.getClOrdID());
 		}
 	}
 
-	public long getChildWorkingQty(Order<?> parent) {
-		long childQty = 0;
-		for (ChildOrder child : children.get(parent)) {
-			childQty += child.getWorkingQty();
+	public void forceCancelFamily(Order parent) {
+		Collection<ChildOrder> children = childOrderRepo.get(parent);
+		for (ChildOrder child : children) {
+			child.cancel();
 		}
-		return childQty;
+		parent.cancel();
 	}
 }
 
